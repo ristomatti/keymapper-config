@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+value_font=${font:-$(xrescat i3xrocks.value.font "Source Code Pro Medium 13")}
+label_icon=""
+label_color=${label_color:-$(xrescat i3xrocks.label.color "#7B8394")}
+
+value_color=${warning:-$(xrescat i3xrocks.warning  "#EBCB8B")}
+
+mods_enabled=$(/bin/ls "${HOME}/.local/state/keymapper/virtual" | xargs echo)
+
+if [[ ${#mods_enabled} -gt 0 ]]; then
+  echo "<span color=\"${label_color}\">${label_icon}</span><span font_desc=\"${value_font}\" color=\"${value_color}\">${mods_enabled}</span>"
+fi
+
