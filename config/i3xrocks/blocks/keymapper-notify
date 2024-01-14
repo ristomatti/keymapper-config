@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+display_duration=3
+
+value_font=${font:-$(xrescat i3xrocks.value.font "Source Code Pro Medium 13")}
+label_icon=$(xrescat i3xrocks.label.help )
+label_color=${label_color:-$(xrescat i3xrocks.label.color "#7B8394")}
+value_color=${nominal:-$(xrescat i3xrocks.error.color "#FFA759")}
+
+value_color=${warning:-$(xrescat i3xrocks.warning "#EBCB8B")}
+
+print_value() {
+  while read -r notification; do
+    echo "<span color=\"${label_color}\">${label_icon}</span> <span font_desc=\"${value_font}\" color=\"${value_color}\">${notification}</span>"
+    sleep ${display_duration}
+    echo ""
+  done
+}
+
+dbus-monitor \
+  | grep -A 1 --line-buffered --no-group-separator keymapper \
+  | grep --line-buffered -vE '(keymapper|uint32)' \
+  | sed -Eu "s/^.*\"(.*)\"$/\1/g" \
+  | print_value
+
