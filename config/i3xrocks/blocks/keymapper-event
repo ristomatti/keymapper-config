@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+FIFO="/tmp/keymapper-event"
+
+rm -f $FIFO 2> /dev/null || mkfifo --mode 600 $FIFO
+
+display_duration="1"
+
+value_font=${font:-$(xrescat i3xrocks.value.font "Source Code Pro Medium 13")}
+label_color=${label_color:-$(xrescat i3xrocks.label.color "#7B8394")}
+value_color=${_value_color:-$(xrescat i3xrocks.error.color "##FFA759")}
+
+# empty_value="<span color=\"${label_color}\">${label_icon}</span> <span font_desc=\"${value_font}\" color=\"${value_color}\"> </span>"
+empty_value="<span font_desc=\"${value_font}\" color=\"${value_color}\"></span>"
+
+# Set initial value
+echo "${empty_value}"
+
+set_value() {
+  while read -r notification; do
+    value=$(sttr upper "$notification")
+    echo "<span font_desc=\"${value_font}\" color=\"${value_color}\">${value}</span>"
+
+    sleep ${display_duration}
+
+    echo "${empty_value}"
+  done
+}
+
+tail -F $FIFO | set_value
