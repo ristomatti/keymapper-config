@@ -1,0 +1,15 @@
+[Unit]
+Description=keymapper state service
+Requires=keymapper.service
+After=keymapper.service
+BindsTo=keymapper.service
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=2
+ExecStart=%h/.config/keymapper/bin/keymapper-state.sh
+
+[Install]
+WantedBy=keymapper.service
+

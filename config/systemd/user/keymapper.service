@@ -1,0 +1,13 @@
+[Unit]
+Description=keymapper service
+Wants=graphical.target
+After=keymapperd.service graphical.target
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=3
+ExecStart=/usr/bin/keymapper --update --no-notify
+
+[Install]
+WantedBy=default.target
