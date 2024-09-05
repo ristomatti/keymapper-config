@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+#
+# i3-open - i3wm utility to focus an application or launch it if not running.
+#
+# Copyright (c) 2024 Ristomatti Airo <ristomatti.airo@gmail.com>
+#
+# This work is licensed under the terms of the MIT license.  
+# For a copy, see <https://opensource.org/licenses/MIT>.
+#
+set -Eeuo pipefail
+
+print_help() {
+  cat << EOF
+Usage:
+  i3-open [OPTIONS] COMMAND
+
+Example usage:
+
+  i3-open -c Spotify spotify
+  i3-open -c Slack -T normal 'gtk-launch slack'
+  i3-open -c obsidian 'xdg-open obsidian://'
+
+ARGS:
+  COMMAND         command to execute
+
+OPTIONS:
+  -s, --scratch   open in scratchpad
+  -c, --class     window class name
+  -i, --instance  window instance name
+  -t, --title     window title
+  -r, --role      window role
+  -T, --type      window type
+  -h, --help      show this help
+EOF
+}
+
+I3_MSG_COMMAND="focus"
+CLASS=""
+INSTANCE=""
+TITLE=""
+ROLE=""
+TYPE=""
+COMMAND=""
+COMMAND_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -s|--scratch)
+      I3_MSG_COMMAND="scratchpad show"
+      shift
+      ;;
+    -c|--class)
+      CLASS="$2"
+      shift
+      shift
+      ;;
+    -i|--instance)
+      INSTANCE="$2"
+      shift
+      shift
+      ;;
+    -t|--title)
+      TITLE="$2"
+      shift
+      shift
+      ;;
+    -r|--role)
+      ROLE="$2"
+      shift
+      shift
+      ;;
+    -T|--type)
+      TYPE="$2"
+      shift
+      shift
+      ;;
+    -h|--help)
+      print_help
+      exit 0
+      ;;
+    --)    # end of options
+      shift
+      COMMAND_ARGS=("$@")
+      break
+      ;;
+    *)
+      if [ -z "$COMMAND" ]; then
+        COMMAND="$1"
+      else
+        COMMAND="$COMMAND ${*:1}"
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$COMMAND" ]; then
+  print_help
+  exit 1
+fi
+
+SELECTOR="["
+[ -n "$CLASS" ] && SELECTOR+="class=\"$CLASS\" "
+[ -n "$INSTANCE" ] && SELECTOR+="instance=\"$INSTANCE\" "
+[ -n "$TITLE" ] && SELECTOR+="title=\"$TITLE\" "
+[ -n "$ROLE" ] && SELECTOR+="window_role=\"$ROLE\" "
+[ -n "$TYPE" ] && SELECTOR+="window_type=\"$TYPE\" "
+SELECTOR="${SELECTOR% }]"
+
+if [ -n "$SELECTOR" ] && i3-msg "$SELECTOR $I3_MSG_COMMAND" 2> /dev/null | grep -q "true"; then
+  echo "Focused window by $SELECTOR"
+else
+  echo "Attempting to execute: $COMMAND"
+  exec $COMMAND "${COMMAND_ARGS[@]}"
+fi
+
