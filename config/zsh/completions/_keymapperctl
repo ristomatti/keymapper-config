@@ -1,0 +1,76 @@
+#compdef keymapperctl
+# shellcheck disable=SC2034,SC2154,SC2296
+
+KEYMAPPER_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/keymapper"
+
+# Based on the --help listing below:
+#
+# keymapperctl 4.8.0-1
+# (c) 2019-2024 by Albert Kalchmair
+#
+# Usage: keymapperctl [--operation]
+#   --input <sequence>    injects an input key sequence.
+#   --output <sequence>   injects an output key sequence.
+#   --type "string"       types a string of characters.
+#   --next-key-info       outputs information about the next key press.
+#   --set-config "file"   sets a new configuration.
+#   --is-pressed <key>    sets the result code 0 when a virtual key is down.
+#   --is-released <key>   sets the result code 0 when a virtual key is up.
+#   --press <key>         presses a virtual key.
+#   --release <key>       releases a virtual key.
+#   --toggle <key>        toggles a virtual key.
+#   --wait-pressed <key>  waits until a virtual key is pressed.
+#   --wait-released <key> waits until a virtual key is released.
+#   --wait-toggled <key>  waits until a virtual key is toggled.
+#   --timeout <millisecs> sets a timeout for the following operation.
+#   --wait <millisecs>    unconditionally waits a given amount of time.
+#   --instance <id>       replaces another keymapperctl process with the same id.
+#   --restart             starts processing the first operation again.
+#   --stdout              outputs the result code.
+#   -h, --help            print this help.
+
+_keymapperctl() {
+  local -a commands
+
+  commands=(
+    '--input[injects an input key sequence.]:::'
+    '--output[injects an output key sequence.]:::'
+    '--type[types a string of characters.]:::'
+    '--next-key-info[outputs information about the next key press.]::'
+    '--set-config[sets a new configuration.]:file:_files -g "*.conf"'
+    '--is-pressed[sets the result code 0 when a virtual key is down.]:key:_keymapper_keys'
+    '--is-released[sets the result code 0 when a virtual key is up.]:key:_keymapper_keys'
+    '--press[presses a virtual key.]:key:_keymapper_keys'
+    '--release[releases a virtual key.]:key:_keymapper_keys'
+    '--toggle[toggles a virtual key.]:key:_keymapper_keys'
+    '--wait-pressed[waits until a virtual key is pressed.]:key:_keymapper_keys'
+    '--wait-released[waits until a virtual key is released.]:key:_keymapper_keys'
+    '--wait-toggled[waits until a virtual key is toggled.]:key:_keymapper_keys'
+    '--timeout[sets a timeout for the following operation.]:key:_keymapper_keys'
+    '--wait[unconditionally waits a given amount of time.]:key:_keymapper_keys'
+    '--instance[replaces another keymapperctl process with the same id.]:::'
+    '--restart[starts processing the first operation again.]::'
+    '--stdout[writes the result code to stdout.]::'
+    '(-h --help)'{-h,--help}'[print this help.]::'
+  )
+  
+  _arguments "${commands[@]}"
+}
+
+_keymapper_keys() {
+  local -a keys
+
+  # Include numeric virtual keys and aliases
+  # keys=("${(@f)$(rg --no-filename --no-line-number '^([\w\d]+)\s*=\s*(Virtual\d{1,3}).*$' --replace '$1 $2' ${KEYMAPPER_CONFIG_DIR}/**/*.conf | tr ' ' '\n' | sort)}")
+
+  # Include only aliases
+  # shellcheck disable=SC2086
+  keys=("${(@f)$(rg --no-line-number --no-filename '^([\w\d]+)\s*=\s*(Virtual\d{1,3}).*$' --replace '$1' ${KEYMAPPER_CONFIG_DIR}/**/*.conf | sort)}")
+  
+  _describe 'keys' keys
+}
+
+# don't run the completion function when being source-ed or eval-ed
+if [ "${funcstack[1]}" = "_keymapperctl" ]; then
+  _keymapperctl "$@"
+fi
