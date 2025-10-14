@@ -1,0 +1,5 @@
+#
+# Create symlink for Keymapper's virtual input device
+#
+SUBSYSTEM=="input", ATTRS{name}=="keymapper", SYMLINK+="keymapper"
+
