@@ -111,6 +111,6 @@ if [ -n "$SELECTOR" ] && i3-msg "$SELECTOR $I3_MSG_COMMAND" 2> /dev/null | grep 
   echo "Focused window by $SELECTOR"
 else
   echo "Attempting to execute: $COMMAND"
-  exec $COMMAND "${COMMAND_ARGS[@]}"
+  i3-msg "exec $COMMAND ${COMMAND_ARGS[*]}"
 fi
 
