@@ -19,11 +19,6 @@ state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/keymapper/virtual"
 cleanup() {
   trap - SIGINT SIGTERM ERR EXIT
 
-  echo "Releasing xdotool key locks..." >&2
-  xdotool keyup Ctrl || true
-  xdotool keyup Alt || true
-  xdotool keyup Shift || true
-
   echo "Ensuring entr is not left running..." >&2
   pkill -f "$state_dir" 2> /dev/null || true
 
